@@ -27,14 +27,65 @@
 				overflow:hidden;
 			}
 			#wrap{
+				position:relative;
 				width:100%;
 				height:100%;
 				overflow: hidden;
 			}
+			#wrap .header{
+				width:100%;
+				height:2rem;
+				background-color:#333;
+				color:#fff;
+				text-align: center;
+				line-height:2rem;
+				font-size:.8rem;
+				font-family:'宋体';
+			}
+			#wrap .contentWrap{
+				position:absolute;
+				left:0;
+				right:0;
+				top:2rem;
+				bottom:0;
+			}
+			#wrap .contentWrap .content .imgList{
+				overflow: hidden;
+			}
+			#wrap .contentWrap .content .imgList li{
+				float:left;
+				width:7rem;
+				height:7rem;
+				margin:.5rem;
+			}
+			#wrap .contentWrap .content .imgList li img{
+				width:100%;
+				border-radius: 10px;
+			}
 		</style>
 	</head>
 	<body>
-		<div id="wrap"></div>
+		<div id="wrap">
+			<header class="header">三国女将</header>
+			<div class="contentWrap">
+				<div class="content">
+					<ul class="imgList">
+						<li><img src="img/1.jpg" alt="" /></li>
+						<li><img src="img/2.jpg" alt="" /></li>
+						<li><img src="img/3.jpg" alt="" /></li>
+						<li><img src="img/4.jpg" alt="" /></li>
+						<li><img src="img/5.jpg" alt="" /></li>
+						<li><img src="img/6.jpg" alt="" /></li>
+						<li><img src="img/7.jpg" alt="" /></li>
+						<li><img src="img/8.jpg" alt="" /></li>
+						<li><img src="img/9.jpg" alt="" /></li>
+						<li><img src="img/10.jpg" alt="" /></li>
+						<li><img src="img/11.jpg" alt="" /></li>
+						<li><img src="img/12.jpg" alt="" /></li>
+					</ul>
+				</div>
+			</div>
+		</div>
 		<script type="text/javascript">
 			!(function(){
 				var width=document.documentElement.clientWidth;
