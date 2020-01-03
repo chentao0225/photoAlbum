@@ -32,7 +32,7 @@
 				height:100%;
 				overflow: hidden;
 			}
-			#wrap .header{
+			#wrap .header,#wrap .bigImg .headerImg{
 				width:100%;
 				height:2rem;
 				background-color:#333;
@@ -42,7 +42,7 @@
 				font-size:.8rem;
 				font-family:'宋体';
 			}
-			#wrap .contentWrap{
+			#wrap .contentWrap,#wrap .contentImg{
 				overflow:hidden;
 				position:absolute;
 				left:0;
@@ -82,6 +82,44 @@
 				
 				transform: scale(0);
 			}
+			#wrap .scrollBar{
+				position:absolute;
+				right:0;
+				top:2rem;
+				width:5px;
+				background-color:skyblue;
+				opacity:0;
+				transform: opacity 1s;
+			}
+			#wrap .bigImg{
+				position:absolute;
+				left:0;
+				top:0;
+				width:100%;
+				height:100%;
+				transform: scale(0);
+				transition: transform 2s;
+			}
+			#wrap .bigImg .headerImg a{
+				float:right;
+				color:#fff;
+				font-size:.8rem;
+				margin-right: 10px;
+				margin-left: -10px;
+			}
+			#wrap .bigImg .contentImg{
+				background-color: #eee;
+			}
+			#wrap .bigImg .contentImg img{
+				position:absolute;
+				left: 0;
+				top:0;
+				right:0;
+				bottom:0;
+				margin:auto;
+				width:12rem;
+				height:12rem;
+			}
 		</style>
 	</head>
 	<body>
@@ -95,9 +133,20 @@
 					<div class="footer">上滑加载更多</div>
 				</div>
 			</div>
+			<div class="scrollBar"></div>
+			<div class="bigImg">
+				<header class="headerImg">
+					大图预览
+					<a href="javascript:;">×</a>
+				</header>
+				<div class="contentImg">
+					<img src=""/>
+				</div>
+			</div>
 		</div>
 		<script src="js/transform.js"></script>
 		<script src="js/drag.js"></script>
+		<script src="js/gesture.js"></script>
 		<script type="text/javascript">
 			!(function(){
 				var width=document.documentElement.clientWidth;
@@ -122,7 +171,11 @@
 			var content=document.querySelector('#wrap .contentWrap .content');
 			var isFooter=false;
 			var footer=document.querySelector('#wrap .contentWrap .content .footer');
-			for (var i = 0; i < 100; i++) {
+			var bigImg=document.querySelector('#wrap .bigImg');
+			var imgNode=document.querySelector('#wrap .bigImg .contentImg img');
+			var close=document.querySelector('#wrap .bigImg .headerImg a');
+			var isMove=false;
+			for (var i = 0; i < 20; i++) {
 				imgArr.push('img/'+(i%18+1)+'.jpg');
 			}
 
@@ -130,10 +183,42 @@
 			var length=12;
 			var end=0;
 			createLi();
+			
+			var scrollBar=document.querySelector('#wrap .scrollBar');
+			var scrollScale=contentWrap.clientHeight/content.offsetHeight;
+			scrollBar.style.height=contentWrap.clientHeight*scrollScale +'px';
+			//动态创建li
 			function createLi(){
-				end=start+length; 
+				if(start>=imgArr.length){
+					transformCss(footer,'scale',1);
+					footer.innerHTML='到底了！';
+					
+					setTimeout(function(){
+						var lastY=contentWrap.clientHeight-content.offsetHeight;
+						content.style.transition='1s';
+						transformCss(content,'translateY',lastY);
+					},1000);
+					return;
+				}
+				end=start+length;
+				end=end>imgArr.length?imgArr.length:end;
 				for (var i = start; i < end; i++) {
 					var li=document.createElement('li');
+					li.addEventListener('touchmove',function(){
+						isMove=true;
+					})
+					
+					li.addEventListener('touchend',function(){
+						if(!isMove){
+							var left=this.getBoundingClientRect().left;
+							var top=this.getBoundingClientRect().top;
+							bigImg.style.transformOrigin=left+'px '+top+'px';
+							transformCss(bigImg,'scale',1);
+							imgNode.src=this.imgSrc;
+						}
+						isMove=false;
+					});
+					
 					li.imgSrc=imgArr[i];
 					li.imgLoad=false;
 					imgList.appendChild(li);
@@ -141,7 +226,7 @@
 				start=end;
 				lazyLoad();
 			}
-			
+			//懒加载
 			function lazyLoad(){
 				var liNodes=imgList.querySelectorAll('li');
 				var h=header.offsetHeight;
@@ -155,6 +240,7 @@
 					}
 				}
 			}
+			//创建图片
 			function createImg(liEle){
 				liEle.imgLoad=true;
 				var img=new Image();
@@ -172,6 +258,7 @@
 					if(Math.abs(h)<=Math.abs(H)){
 						isFooter=true;
 					}
+					scrollBar.style.opacity=1;
 				},
 				move:function(){
 					if(isFooter){
@@ -183,9 +270,56 @@
  						transformCss(footer,'scale',footerScale);
 					}
 					lazyLoad();
+					scrollBar.style.opacity=1;
+					var scrollScale=contentWrap.clientHeight/content.offsetHeight;
+					var lastY=transformCss(content,'translateY');
+					transformCss(scrollBar,'translateY',lastY*-scrollScale);
+				},
+				endTrue:function(timer){
+					var h=contentWrap.clientHeight-content.offsetHeight;
+					var H=content.offsetHeight;
+					var footerH=Math.abs(H)-Math.abs(h);
+					if(isFooter && footerH>=footer.offsetHeight){
+						isFooter=false;
+						transformCss(footer,'scale',0);
+						clearInterval(timer);
+						createLi();
+						scrollBar.style.opacity=0;
+						var scrollScale=contentWrap.clientHeight/content.offsetHeight;
+						scrollBar.style.height=contentWrap.clientHeight*scrollScale+'px';
+					}
+				},
+				end:function(){
+					scrollBar.style.opacity=0;
 				}
 			}
+			//主体内容滑动
 			contentDrag(contentWrap,callback);
+			//关闭放大图片
+			close.addEventListener('touchstart',function(){
+				transformCss(bigImg,'scale',0);
+				transformCss(imgNode,'scale',1);
+				transformCss(imgNode,'rotate',0);
+			});
+			
+			//多指操作
+			var startScale=1;
+			var startRotate=0;
+			var callbacks={
+				start:function(){
+					startScale=transformCss(imgNode,'scale');
+					startRotate=transformCss(imgNode,'rotate');
+				},
+				change:function(e){
+					transformCss(imgNode,'scale',startScale*e.scale);
+					transformCss(imgNode,'rotate',startRotate+e.rotate);
+				},
+				end:function(){
+					
+				}
+			}
+			gesture(imgNode,callbacks);
+			
 		</script>
 	</body>
 </html>

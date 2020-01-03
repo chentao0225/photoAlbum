@@ -79,7 +79,9 @@
 			}
 			
 			tweenMove(lastY,timerAll,type);
-			
+			if(callback&&typeof callback['endTrue']=='function'){
+				callback['endTrue'](timer);
+			}
 			function tweenMove(lastY,timerAll,type){
 				var t=0;
 				var b=transformCss(nodeList,'translateY');
@@ -88,10 +90,16 @@
 				timer=setInterval(function(){
 					if(t>=d){
 						clearInterval(timer);
+						if(callback && typeof callback['end']=='function'){
+							callback['end']();
+						}
 					}else{
 						t++;
 						var lastY=tween[type](t,b,c,d);
 						transformCss(nodeList,'translateY',lastY);
+						if(callback && typeof callback['move']=='function'){
+							callback['move']();
+						}
 					}
 				},20);
 			}
