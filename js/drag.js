@@ -48,13 +48,13 @@
 			}
 			var lastY=eleY+disY;
 			if(lastY>0){
-				var scale=0.6-lastY/(3*document.documentElement.clientHeight);
+				var scale=0.6-lastY/(3*nodeWrap.offsetHeight);
 				lastY=lastY*scale;
-			}else if(lastY<document.documentElement.clientHeight-nodeList.offsetHeight){
-				var temp=Math.abs(lastY)-Math.abs(document.documentElement.clientHeight-nodeList.offsetHeight);
-				var scale=0.6-temp/(3*document.documentElement.clientHeight);
+			}else if(lastY<nodeWrap.offsetHeight-nodeList.offsetHeight){
+				var temp=Math.abs(lastY)-Math.abs(nodeWrap.offsetHeight-nodeList.offsetHeight);
+				var scale=0.6-temp/(3*nodeWrap.offsetHeight);
 				temp=temp*scale;
-				lastY=document.documentElement.clientHeight-nodeList.offsetHeight-temp;
+				lastY=nodeWrap.offsetHeight-nodeList.offsetHeight-temp;
 			}
 			transformCss(nodeList,'translateY',lastY);
 			if(callback && typeof callback['move']=='function'){
@@ -73,8 +73,8 @@
 			if(lastY>0){
 				lastY=0;
 				type='easeOut';
-			}else if(lastY<document.documentElement.clientHeight-nodeList.offsetHeight){
-				lastY=document.documentElement.clientHeight-nodeList.offsetHeight;
+			}else if(lastY<nodeWrap.offsetHeight-nodeList.offsetHeight){
+				lastY=nodeWrap.offsetHeight-nodeList.offsetHeight;
 				type='easeOut';
 			}
 			
